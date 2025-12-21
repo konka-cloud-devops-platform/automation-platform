@@ -1,0 +1,15 @@
+---
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+- role: worker
+- role: worker
+
+
+# - --kubelet-insecure-tls
+# kubectl port-forward svc/argocd-server --address 0.0.0.0 8080:443 &
+
+#  k get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+# timeout.reconciliation: 60s
