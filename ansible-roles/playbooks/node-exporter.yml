@@ -1,0 +1,7 @@
+- name: Install Node Exporter locally
+  hosts: localhost
+  connection: local
+  become: true
+
+  roles:
+    - ../roles/node-exporter

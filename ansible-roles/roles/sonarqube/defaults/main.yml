@@ -1,0 +1,6 @@
+sonar_user: "sonar"
+sonar_install_dir: "/opt/sonar"
+sonar_version: "9.9.2.77730"
+sonar_zip_url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonar_version }}.zip"
+java_package: "openjdk-17-jdk"
+systemd_service_file: "/etc/systemd/system/sonar.service"

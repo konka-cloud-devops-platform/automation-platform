@@ -1,0 +1,5 @@
+nginx_exporter_version: "0.11.0"
+nginx_exporter_user: "nginx_exporter"
+nginx_exporter_install_dir: "/usr/local/bin"
+nginx_exporter_service: "nginx_exporter"
+nginx_status_url: "http://localhost:8080/stub_status"

@@ -1,0 +1,69 @@
+---
+- name: Ensure system is updated
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install required packages
+  apt:
+    name:
+      - "{{ java_package }}"
+      - unzip
+      - wget
+    state: present
+
+- name: Create sonar user
+  user:
+    name: "{{ sonar_user }}"
+    shell: /bin/bash
+    state: present
+
+- name: Download SonarQube zip
+  get_url:
+    url: "{{ sonar_zip_url }}"
+    dest: "/opt/sonarqube-{{ sonar_version }}.zip"
+    mode: '0644'
+    force: yes
+
+- name: Unzip SonarQube
+  unarchive:
+    src: "/opt/sonarqube-{{ sonar_version }}.zip"
+    dest: "/opt"
+    remote_src: yes
+    creates: "/opt/sonarqube-{{ sonar_version }}"
+
+- name: Move SonarQube to standard directory
+  command: mv "/opt/sonarqube-{{ sonar_version }}" "{{ sonar_install_dir }}"
+  args:
+    removes: "/opt/sonarqube-{{ sonar_version }}"
+  when: not ansible_facts['os_family'] == 'Darwin'  # skip on MacOS
+
+- name: Set ownership for SonarQube directory
+  file:
+    path: "{{ sonar_install_dir }}"
+    owner: "{{ sonar_user }}"
+    group: "{{ sonar_user }}"
+    recurse: yes
+
+- name: Add sonar user to sudoers (NOPASSWD)
+  lineinfile:
+    path: /etc/sudoers
+    line: "{{ sonar_user }} ALL=(ALL:ALL) NOPASSWD:ALL"
+    state: present
+    validate: 'visudo -cf %s'
+
+- name: Create systemd service file for SonarQube
+  template:
+    src: sonar.service.j2
+    dest: "{{ systemd_service_file }}"
+    mode: '0644'
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start SonarQube service
+  systemd:
+    name: sonar
+    state: started
+    enabled: yes

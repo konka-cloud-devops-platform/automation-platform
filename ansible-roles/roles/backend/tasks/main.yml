@@ -1,0 +1,44 @@
+---
+- name: Install Java
+  yum:
+    name: "{{ java_package }}"
+    state: present
+- name: Create backend user
+  user:
+    name: "{{ app_user }}"
+    shell: "{{ app_shell }}"
+    create_home: no
+- name: Create /app directory with SGID
+  file:
+    path: /app
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '2775'   # SGID bit set (2 before 775)
+
+- name: Ensure default ACL for user and group ownership on /app
+  acl:
+    path: /app
+    entity: "{{ app_user }}"
+    etype: "{{ item }}"
+    permissions: rwx
+    default: yes
+    state: present
+  loop:
+    - user
+    - group
+
+- name: Apply ACL for user and group on existing files in /app
+  acl:
+    path: /app
+    entity: "{{ app_user }}"
+    etype: "{{ item }}"
+    permissions: rwx
+    state: present
+  loop:
+    - user
+    - group
+
+- name: Apply ACL recursively to all existing files inside /app
+  command: >
+    setfacl -R -m u:{{ app_user }}:rwx,g:{{ app_user }}:rwx /app

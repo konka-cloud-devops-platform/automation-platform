@@ -1,0 +1,7 @@
+- name: Install Grafana Enterprise locally
+  hosts: localhost
+  connection: local
+  become: true
+
+  roles:
+    - ../roles/grafana

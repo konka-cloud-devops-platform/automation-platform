@@ -1,0 +1,29 @@
+---
+- name: Add Filebeat Yum Repository
+  yum_repository:
+    name: "{{ filebeat_repo_name }}"
+    description: "Elasticsearch repository for 9.x packages"
+    baseurl: "{{ filebeat_repo_baseurl }}"
+    gpgcheck: yes
+    gpgkey: "{{ filebeat_repo_gpgkey }}"
+    enabled: yes
+
+- name: Install Filebeat
+  dnf:
+    name: filebeat
+    state: present
+
+- name: Deploy Filebeat configuration
+  template:
+    src: filebeat.yml.j2
+    dest: "{{ filebeat_config_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Filebeat
+
+- name: Enable and Start Filebeat Service
+  systemd:
+    name: "{{ filebeat_service }}"
+    enabled: yes
+    state: started

@@ -1,0 +1,46 @@
+groups:
+- name: node_alerts
+  rules:
+  - alert: NodeDown
+    expr: up == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Node is down"
+      description: "Instance {{ $labels.instance }} is not reachable"
+  - alert: InstanceDown
+    expr: up{job="ec2-instances"} == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance {{ $labels.instance_id }} is down"
+      description: "{{ $labels.node_name }} ({{ $labels.instance_id }}) has been down for more than 5 minutes"
+
+  - alert: HighCPUUsage
+    expr: 100 - (avg by(instance_id) (rate(node_cpu_seconds_total{job="ec2-instances", mode="idle"}[5m])) * 100) > 90
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage on {{ $labels.instance_id }}"
+      description: "CPU usage is above 90% for 10 minutes on {{ $labels.node_name }}"
+
+  - alert: HighMemoryUsage
+    expr: (node_memory_MemTotal_bytes{job="ec2-instances"} - node_memory_MemAvailable_bytes{job="ec2-instances"}) / node_memory_MemTotal_bytes{job="ec2-instances"} * 100 > 85
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High Memory usage on {{ $labels.instance_id }}"
+      description: "Memory usage is above 85% for 10 minutes on {{ $labels.node_name }}"
+  
+  - alert: HighDiskUsage
+    expr: (node_filesystem_size_bytes{fstype!="tmpfs",fstype!="overlay"} - node_filesystem_free_bytes{fstype!="tmpfs",fstype!="overlay"}) / node_filesystem_size_bytes{fstype!="tmpfs",fstype!="overlay"} * 100 > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High Disk Usage on {{ $labels.instance }}"
+      description: "Disk usage is above 80% (Current value: {{ $value }}%) on instance {{ $labels.instance }} for mountpoint {{ $labels.mountpoint }}."

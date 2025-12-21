@@ -1,0 +1,32 @@
+---
+- name: Copy Elasticsearch repo
+  copy:
+    src: elasticsearch.repo
+    dest: /etc/yum.repos.d/elasticsearch.repo
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install Elasticsearch
+  dnf:
+    name: elasticsearch
+    enablerepo: elasticsearch
+    state: present
+
+- name: Set xpack.security.enabled to false
+  lineinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    regexp: '^xpack.security.enabled:.*'
+    line: 'xpack.security.enabled: false'
+    create: yes
+    backup: yes
+  notify: Restart Elasticsearch
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+
+- name: Enable and start Elasticsearch
+  systemd:
+    name: elasticsearch
+    enabled: yes
+    state: started

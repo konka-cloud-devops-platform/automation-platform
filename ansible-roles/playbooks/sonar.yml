@@ -1,0 +1,6 @@
+---
+- name: Install SonarQube
+  hosts: localhost
+  become: yes
+  roles:
+    - role: ../roles/sonarqube

@@ -1,0 +1,15 @@
+[Unit]
+Description=Prometheus Alertmanager
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ alertmanager_user }}
+ExecStart={{ alertmanager_install_dir }}/alertmanager-{{ alertmanager_version }}.linux-amd64/alertmanager \
+  --config.file={{ alertmanager_install_dir }}/alertmanager-{{ alertmanager_version }}.linux-amd64/alertmanager.yml \
+  --storage.path={{ alertmanager_install_dir }}/data
+
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

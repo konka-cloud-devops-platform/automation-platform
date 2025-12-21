@@ -1,0 +1,70 @@
+- name: Create prometheus user
+  user:
+    name: "{{ prometheus_user }}"
+    shell: /sbin/nologin
+    system: yes
+    create_home: no
+
+- name: Create Prometheus install directory
+  file:
+    path: "{{ prometheus_install_dir }}"
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_user }}"
+    mode: '0755'
+
+- name: Download Prometheus
+  get_url:
+    url: "{{ prometheus_download_url }}"
+    dest: /tmp/prometheus.tar.gz
+
+- name: Extract Prometheus
+  unarchive:
+    src: /tmp/prometheus.tar.gz
+    dest: "{{ prometheus_install_dir }}"
+    remote_src: yes
+    creates: "{{ prometheus_install_dir }}/prometheus-{{ prometheus_version }}.linux-amd64"
+
+- name: Set up Prometheus config
+  template:
+    src: prometheus.yml.j2
+    dest: "{{ prometheus_install_dir }}/prometheus-{{ prometheus_version }}.linux-amd64/prometheus.yml"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_user }}"
+  notify:
+    - restart prometheus
+- name: Create systemd service file
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    mode: '0644'
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: Enable and start Prometheus
+  systemd:
+    name: prometheus
+    enabled: true
+    state: started
+
+- name: Create rules directory
+  file:
+    path: "{{ prometheus_install_dir }}/prometheus-{{ prometheus_version }}.linux-amd64/rules"
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_user }}"
+    mode: '0755'
+
+- name: Copy Prometheus alert rule file
+  copy:
+    src: node_alerts.yml
+    dest: "{{ prometheus_install_dir }}/prometheus-{{ prometheus_version }}.linux-amd64/rules/node_alerts.yml"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_user }}"
+    mode: '0644'
+  notify: restart prometheus
+
+
+

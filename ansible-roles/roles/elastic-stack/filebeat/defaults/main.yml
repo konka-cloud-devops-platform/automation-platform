@@ -1,0 +1,10 @@
+filebeat_repo_name: "elasticsearch"
+filebeat_repo_baseurl: "https://artifacts.elastic.co/packages/9.x/yum"
+filebeat_repo_gpgkey: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+filebeat_service: "filebeat"
+filebeat_config_path: "/etc/filebeat/filebeat.yml"
+filebeat_logs_path: "/var/log/*.log"
+filebeat_elasticsearch_hosts: ["localhost:9200"]
+filebeat_modules_enabled: false
+filebeat_output_type: "logstash" # can be "logstash/elasticsearch" if needed
+filebeat_logstash_hosts: ["localhost:5044"]

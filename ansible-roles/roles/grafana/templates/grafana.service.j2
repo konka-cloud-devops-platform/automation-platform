@@ -1,0 +1,13 @@
+[Unit]
+Description=Grafana Enterprise
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ grafana_user }}
+ExecStart=/opt/grafana/grafana-v{{ grafana_version }}/bin/grafana-server \
+  --homepath=/opt/grafana/grafana-v{{ grafana_version }} \
+  --config=/opt/grafana/grafana-v{{ grafana_version }}/conf/defaults.ini
+
+[Install]
+WantedBy=multi-user.target

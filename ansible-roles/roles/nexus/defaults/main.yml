@@ -1,0 +1,6 @@
+java_package: "java-21-amazon-corretto-devel"
+nexus_url: "https://download.sonatype.com/nexus/3/nexus-3.83.2-01-linux-x86_64.tar.gz"
+nexus_tmp_dir: "/tmp/nexus"
+nexus_install_dir: "/opt/nexus"
+nexus_user: "nexus"
+service_file: "/etc/systemd/system/nexus.service"

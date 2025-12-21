@@ -1,0 +1,34 @@
+###################### Filebeat Configuration #########################
+
+filebeat.inputs:
+- type: filestream
+  id: my-filestream-id
+  enabled: true
+  paths:
+    - {{ filebeat_logs_path }}
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: {{ filebeat_modules_enabled | lower }}
+
+setup.template.settings:
+  index.number_of_shards: 1
+
+setup.kibana:
+  #host: "localhost:5601"
+
+
+{% if filebeat_output_type == "elasticsearch" %}
+output.elasticsearch:
+  hosts: [{% for host in filebeat_elasticsearch_hosts %}"{{ host }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% elif filebeat_output_type == "logstash" %}
+output.logstash:
+  hosts: [{% for host in filebeat_logstash_hosts %}"{{ host }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% endif %}
+
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - add_kubernetes_metadata: ~

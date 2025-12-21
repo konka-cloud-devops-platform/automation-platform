@@ -1,0 +1,26 @@
+---
+- name: Install Nginx
+  package:
+    name:
+      - nginx
+    state: present
+
+- name: Enable and start Nginx
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Find all files and folders inside /usr/share/nginx/html
+  find:
+    paths: /usr/share/nginx/html
+    file_type: any
+    recurse: yes
+  register: files_to_remove
+
+- name: Remove everything inside /usr/share/nginx/html
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ files_to_remove.files }}"
+  

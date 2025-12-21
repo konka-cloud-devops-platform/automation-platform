@@ -1,0 +1,84 @@
+---
+- name: Install Java
+  yum:
+    name: "{{ java_package }}"
+    state: present
+
+- name: Create Nexus directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ nexus_tmp_dir }}"
+    - "{{ nexus_install_dir }}"
+
+- name: Download Nexus tarball
+  get_url:
+    url: "{{ nexus_url }}"
+    dest: "{{ nexus_tmp_dir }}/nexus.tar.gz"
+
+- name: Extract Nexus archive
+  unarchive:
+    src: "{{ nexus_tmp_dir }}/nexus.tar.gz"
+    dest: "{{ nexus_tmp_dir }}"
+    remote_src: yes
+
+- name: List files in Nexus tarball
+  unarchive:
+    src: "{{ nexus_tmp_dir }}/nexus.tar.gz"
+    dest: "{{ nexus_tmp_dir }}"
+    list_files: yes
+  register: nexus_files
+
+- name: Set Nexus directory name dynamically
+  set_fact:
+    nexus_dir: "{{ nexus_files.files[0].split('/')[0] }}"
+
+- name: Remove old Nexus directory if exists
+  file:
+    path: "{{ nexus_install_dir }}/{{ nexus_dir }}"
+    state: absent
+
+- name: Move Nexus files to installation directory
+  command: mv "{{ nexus_tmp_dir }}/{{ nexus_dir }}" "{{ nexus_install_dir }}/"
+
+
+# - name: Move Nexus files to installation directory
+#   command: mv "{{ nexus_tmp_dir }}/{{ nexus_dir }}" "{{ nexus_install_dir }}/"
+#   args:
+#     removes: "{{ nexus_tmp_dir }}/{{ nexus_dir }}"
+
+- name: Create Nexus user
+  user:
+    name: "{{ nexus_user }}"
+    shell: /bin/bash"
+
+- name: Set ownership for Nexus directory
+  file:
+    path: "{{ nexus_install_dir }}"
+    owner: "{{ nexus_user }}"
+    group: "{{ nexus_user }}"
+    recurse: yes
+
+- name: Configure nexus.rc file
+  lineinfile:
+    path: "{{ nexus_install_dir }}/{{ nexus_dir }}/bin/nexus.rc"
+    line: 'run_as_user="{{ nexus_user }}"'
+    create: yes
+
+- name: Create systemd service file for Nexus
+  template:
+    src: nexus.service.j2
+    dest: "{{ service_file }}"
+    mode: '0644'
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start Nexus service
+  systemd:
+    name: nexus
+    state: started
+    enabled: yes

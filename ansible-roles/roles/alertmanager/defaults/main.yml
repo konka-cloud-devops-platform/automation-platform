@@ -1,0 +1,4 @@
+alertmanager_version: "0.28.1"
+alertmanager_user: "alertmgr"
+alertmanager_install_dir: "/opt/alertmanager"
+alertmanager_download_url: "https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"

@@ -1,0 +1,36 @@
+global:
+  scrape_interval: 15s
+
+rule_files:
+  - "rules/node_alerts.yml"
+  
+scrape_configs:
+
+  - job_name: 'ec2-instances'
+    ec2_sd_configs:
+      - region: us-east-1
+        port: 9100
+        filters:
+          - name: "tag:Monitoring"
+            values: ["true"]
+    relabel_configs:
+      # Use private IP for scraping
+      - source_labels: [__meta_ec2_private_ip]
+        target_label: __address__
+        replacement: $1:9100
+
+      # Add Node IP as a custom label
+      - source_labels: [__meta_ec2_private_ip]
+        target_label: node_ip
+
+      # Add Node Name (from Name tag) as a label
+      - source_labels: [__meta_ec2_tag_Name]
+        target_label: node_name
+
+      # Add Instance ID
+      - source_labels: [__meta_ec2_instance_id]
+        target_label: instance_id
+
+      # Add ASG name
+      - source_labels: [__meta_ec2_tag_aws_autoscaling_groupName]
+        target_label: asg_name

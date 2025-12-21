@@ -1,0 +1,19 @@
+- name: Elasticsearch Setup
+  hosts: localhost
+  become: yes
+  roles:
+    - role: ../roles/elastic-stack/elasticsearch
+    - role: ../roles/elastic-stack/kibana
+    - role: ../roles/elastic-stack/logstash
+    
+#    - role: ../roles/elastic-stack/filebeat
+    # - role: ../roles/elastic-stack/filebeat
+
+# ---
+# - name: Install Elasticsearch 9.x
+#   hosts: es_nodes
+#   become: true
+#   roles:
+#     - role: elasticsearch9
+#       vars:
+#         es_java_opts: "-Xms2g -Xmx2g"   # override defaults if needed

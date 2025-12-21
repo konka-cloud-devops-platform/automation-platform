@@ -1,0 +1,4 @@
+kibana_repo_url: "https://artifacts.elastic.co/packages/9.x/yum"
+kibana_gpg_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+kibana_port: 5601
+kibana_host: "0.0.0.0"

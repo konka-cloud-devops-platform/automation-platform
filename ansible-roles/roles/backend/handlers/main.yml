@@ -1,0 +1,4 @@
+---
+- name: Reload profile
+  command: source /etc/profile
+  become: yes

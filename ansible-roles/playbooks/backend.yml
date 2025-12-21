@@ -1,0 +1,7 @@
+- name: Setup backend with common packages
+  hosts: localhost
+  become: yes
+  roles:
+    - ../roles/backend
+    # - ../roles/node-exporter
+    # - ../roles/elastic-stack/filebeat

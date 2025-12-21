@@ -1,0 +1,23 @@
+---
+- name: Update all packages
+  dnf:
+    name: "*"
+    state: latest
+  register: update_result
+
+- name: Install common packages
+  dnf:
+    name:
+      - git
+      - tmux
+      - mariadb105
+      - telnet
+      - redis6
+      - tree
+    state: present
+    
+- name: Start and enable Redis 6
+  systemd:
+    name: redis6
+    enabled: yes
+    state: started

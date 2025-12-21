@@ -1,0 +1,177 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "type": "row",
+      "title": "Instance Status",
+      "collapsed": false,
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Instance UP Status",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+          "targets": [
+            {
+              "expr": "up{asg_name=~\"$asg\", instance=~\"$instance\"}",
+              "legendFormat": "{{instance_id}} - {{node_ip}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": 0 },
+                  { "color": "green", "value": 1 }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "CPU Usage",
+      "collapsed": false,
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "CPU Usage (%)",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+          "targets": [
+            {
+              "expr": "100 - (avg by (instance_id, node_ip) (irate(node_cpu_seconds_total{mode=\"idle\", asg_name=~\"$asg\", instance=~\"$instance\"}[5m])) * 100)",
+              "legendFormat": "{{instance_id}} - {{node_ip}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "color": {
+                "mode": "continuous"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Memory Usage",
+      "collapsed": false,
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Memory Usage (%)",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+          "targets": [
+            {
+              "expr": "(1 - (node_memory_MemAvailable_bytes{asg_name=~\"$asg\", instance=~\"$instance\"} / node_memory_MemTotal_bytes{asg_name=~\"$asg\", instance=~\"$instance\"})) * 100",
+              "legendFormat": "{{instance_id}} - {{node_ip}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "color": {
+                "mode": "continuous"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Disk Usage",
+      "collapsed": false,
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Disk Usage (%)",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+          "targets": [
+            {
+              "expr": "(node_filesystem_size_bytes{fstype!=\"rootfs\", asg_name=~\"$asg\", instance=~\"$instance\"} - node_filesystem_free_bytes{fstype!=\"rootfs\", asg_name=~\"$asg\", instance=~\"$instance\"}) / node_filesystem_size_bytes{fstype!=\"rootfs\", asg_name=~\"$asg\", instance=~\"$instance\"} * 100",
+              "legendFormat": "{{instance_id}} - {{node_ip}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "color": {
+                "mode": "continuous"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Network Traffic",
+      "collapsed": false,
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "Network In (bytes/sec)",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+          "targets": [
+            {
+              "expr": "irate(node_network_receive_bytes_total{device!~\"lo\", asg_name=~\"$asg\", instance=~\"$instance\"}[5m])",
+              "legendFormat": "{{instance_id}} - {{node_ip}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Network Out (bytes/sec)",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+          "targets": [
+            {
+              "expr": "irate(node_network_transmit_bytes_total{device!~\"lo\", asg_name=~\"$asg\", instance=~\"$instance\"}[5m])",
+              "legendFormat": "{{instance_id}} - {{node_ip}}",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "asg",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(asg_name)",
+        "refresh": 1
+      },
+      {
+        "name": "instance",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(instance)",
+        "refresh": 1
+      }
+    ]
+  },
+  "title": "EC2 ASG Dashboard",
+  "uid": "asg-monitor",
+  "version": 1
+}

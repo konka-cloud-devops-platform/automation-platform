@@ -1,0 +1,14 @@
+[Unit]
+Description=Nexus service
+After=network.target
+
+[Service]
+Type=forking
+LimitNOFILE=65536
+ExecStart={{ nexus_install_dir }}/{{ nexus_dir }}/bin/nexus start
+ExecStop={{ nexus_install_dir }}/{{ nexus_dir }}/bin/nexus stop
+User={{ nexus_user }}
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

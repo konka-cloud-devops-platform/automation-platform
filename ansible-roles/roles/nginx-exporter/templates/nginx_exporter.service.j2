@@ -1,0 +1,11 @@
+[Unit]
+Description=Nginx Prometheus Exporter
+After=network.target
+
+[Service]
+User={{ nginx_exporter_user }}
+ExecStart={{ nginx_exporter_install_dir }}/nginx-prometheus-exporter -nginx.scrape-uri={{ nginx_status_url }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

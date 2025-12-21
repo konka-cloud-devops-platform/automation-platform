@@ -1,0 +1,5 @@
+---
+java_package: java-17-amazon-corretto-devel
+app_dir: "/app"
+app_user: "expense"
+app_shell: "/sbin/nologin"

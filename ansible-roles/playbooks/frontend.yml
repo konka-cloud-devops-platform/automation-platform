@@ -1,0 +1,10 @@
+- name: Baking Frontend Image
+  hosts: localhost
+  connection: local
+  become: true
+
+  roles:
+    - ../roles/frontend
+    # - ../roles/nginx-exporter
+    # - ../roles/node-exporter
+    # - ../roles/elastic-stack/filebeat

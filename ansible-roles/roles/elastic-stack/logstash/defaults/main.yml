@@ -1,0 +1,7 @@
+logstash_repo_url: "https://artifacts.elastic.co/packages/9.x/yum"
+logstash_gpg_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+logstash_pipeline_dir: "/etc/logstash/conf.d"
+logstash_pipeline_file: "beats-pipeline.conf"
+elasticsearch_host: "http://localhost:9200"
+beats_port: 5044
+logstash_index: "filebeat-%{+YYYY.MM.dd}"

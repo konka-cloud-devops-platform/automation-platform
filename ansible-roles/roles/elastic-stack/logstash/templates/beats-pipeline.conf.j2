@@ -1,0 +1,16 @@
+input {
+  beats {
+    port => {{ beats_port }}
+  }
+}
+
+filter {
+  # You can add filters like grok, json parsing here if needed later
+}
+
+output {
+  elasticsearch {
+    hosts => ["{{ elasticsearch_host }}"]
+    index => "{{ logstash_index }}"
+  }
+}
