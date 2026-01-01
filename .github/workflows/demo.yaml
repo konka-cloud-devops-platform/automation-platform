@@ -9,4 +9,4 @@ jobs:
   call-reusable-workflow:
     uses: konka-cloud-devops-platform/cicd-platform/.github/workflows/demo.yaml@main
     with:
-      runner_label: self-hosted
+      runner_label: konka
