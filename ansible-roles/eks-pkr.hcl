@@ -8,7 +8,7 @@ packer {
 }
 
 source "amazon-ebs" "amz3_gp3" {
-  ami_name      = "backend-{{timestamp}}"
+  ami_name      = "eks-{{timestamp}}"
   instance_type = "t3.micro"
   region        = "ap-south-1"
 
@@ -26,7 +26,7 @@ source "amazon-ebs" "amz3_gp3" {
 
   # Adding tags to the AMI
   tags = {
-    Name        = "backend"
+    Name        = "eks"
     Environment = "Development"
     Owner       = "Konka"
     CreatedBy   = "Packer"
@@ -42,7 +42,7 @@ build {
     inline = [
       "sudo dnf install git ansible -y",
       "git clone https://github.com/konka-cloud-devops-platform/automation-platform.git /tmp/ansible-roles",
-      "ansible-playbook /tmp/ansible-roles/playbooks/backend.yml",
+      "ansible-playbook /tmp/ansible-roles/playbooks/eks-essentials.yml",
       "rm -rf /tmp/ansible-roles",
       "sudo dnf remove git ansible -y"
     ]

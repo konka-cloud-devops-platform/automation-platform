@@ -40,7 +40,7 @@ build {
   provisioner "shell" {
     inline = [
       "sudo dnf install git ansible -y",
-      "git clone https://github.com/konka-devops-lab/ansible-roles.git /tmp/ansible-roles",
+      "git clone https://github.com/konka-cloud-devops-platform/automation-platform.git /tmp/ansible-roles",
       "ansible-playbook /tmp/ansible-roles/playbooks/frontend.yml",
       "rm -rf /tmp/ansible-roles",
       "sudo dnf remove git ansible -y"

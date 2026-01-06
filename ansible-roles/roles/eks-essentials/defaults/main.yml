@@ -1,0 +1,8 @@
+# AWS EKS official kubectl
+eks_version: "1.34.2"
+eks_kubectl_date: "2025-11-13"
+
+install_dir: "/usr/local/bin"
+
+helm_version: "v3.15.4"
+k9s_version: "v0.32.4"
