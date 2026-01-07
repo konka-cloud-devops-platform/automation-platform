@@ -3,12 +3,12 @@
 # Define Instance Details
 declare -A NODES
 NODES=(
-    ["jenkins.ullagallu.in"]="i-014d5345ca0f9f7c6"
-    ["runner.ullagallu.in"]="i-053f6a4f0d8c7a0ed"
+    ["jenkins.konka.online"]="i-0328fa32f5b60ac0d"
+    ["build-agent.konka.online"]="i-08470255d4d33a3fc"
     # ["sonarqube.ullagallu.in"]="i-0d51f59d037663b7e"
 )
 
-HOSTED_ZONE_ID="Z03345832QRDQYLQ53NTN"
+HOSTED_ZONE_ID="Z05358812YCB33LWR8F1V"
 
 # Prompt for new instance type (optional)
 read -p "Enter new instance type (leave empty to skip modification): " NEW_INSTANCE_TYPE
