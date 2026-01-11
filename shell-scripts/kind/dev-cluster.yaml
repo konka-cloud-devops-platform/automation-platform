@@ -44,11 +44,11 @@ apiVersion: kind.x-k8s.io/v1alpha4
 name: dev
 nodes:
 - role: control-plane
-  image: kindest/node:v1.33.4
+  image: kindest/node:v1.34.3
 - role: worker
-  image: kindest/node:v1.33.4
+  image: kindest/node:v1.34.3
 - role: worker
-  image: kindest/node:v1.33.4
+  image: kindest/node:v1.34.3
 networking:
   serviceSubnet: "10.96.0.0/16"
   podSubnet: "10.244.0.0/16"
