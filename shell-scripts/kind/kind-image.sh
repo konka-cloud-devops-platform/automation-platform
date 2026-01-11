@@ -38,6 +38,31 @@ echo "Step 6: Verifying cluster creation..."
 kubectl cluster-info --context "kind-${CLUSTER_NAME}"
 kubectl get nodes
 
+echo "Step 7: Copying Docker config to kind nodes..."
+
+sudo -u ec2-user bash <<'EOF'
+NODES=$(kind get nodes --name dev 2>/dev/null || echo '')
+if [ "$NODES" = "" ]; then
+    echo "No 'dev' cluster found or kind not available"
+    exit 1
+fi
+
+if [ -f /home/ec2-user/.docker/config.json ]; then
+    for node in $NODES; do
+        echo "Copying to $node..."
+        docker exec $node mkdir -p /root/.docker
+        docker cp /home/ec2-user/.docker/config.json $node:/root/.docker/config.json
+    done
+else
+    echo "/home/ec2-user/.docker/config.json does not exist"
+fi
+
+for node in $NODES; do
+    echo "Checking $node..."
+    docker exec $node ls -la /root/.docker/config.json
+done
+EOF
+
 echo "Kind cluster setup completed successfully!"
 
 
