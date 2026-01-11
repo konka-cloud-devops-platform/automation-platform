@@ -1,34 +1,232 @@
+# #!/bin/bash
+
+# echo "======== Donwloading and installing kind, kubectl, helm, kubectx, k9s, kubecolor ======================="
+# [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64
+# chmod +x ./kind
+# sudo mv ./kind /usr/local/bin/kind
+
+# curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+# chmod +x kubectl
+# sudo mv kubectl /usr/local/bin/kubectl
+
+# curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+# chmod 700 get_helm.sh
+# ./get_helm.sh
+
+# sudo git clone https://github.com/ahmetb/kubectx /opt/kubectx
+# sudo ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx
+# sudo ln -s /opt/kubectx/kubens /usr/local/bin/kubens
+
+# curl -sS https://webinstall.dev/k9s | bash
+
+# curl -LO https://github.com/kubecolor/kubecolor/releases/download/v0.5.1/kubecolor_0.5.1_linux_amd64.tar.gz
+# tar -xvf kubecolor_0.5.1_linux_amd64.tar.gz
+# sudo mv kubecolor /usr/local/bin/
+
+# echo "============ tmux and bash configuration ====================="
+# echo "set -g mouse on" >> ~/.tmux.conf
+
+# echo "alias k='kubectl'" >> ~/.bashrc
+# echo "alias kubectl='kubecolor'" >> ~/.bashrc
+
+# source ~/.bashrc
+
+# rm -rf kubecolor_0.5.1_linux_amd64.tar.gz LICENSE README.md get_helm.sh
+
+
 #!/bin/bash
+set -e
 
-echo "======== Donwloading and installing kind, kubectl, helm, kubectx, k9s, kubecolor ======================="
-[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64
-chmod +x ./kind
-sudo mv ./kind /usr/local/bin/kind
+# Configure tmux for ec2-user
+EC2_USER_HOME="/home/ec2-user"
+TMUX_CONF="$EC2_USER_HOME/.tmux.conf"
 
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-chmod +x kubectl
-sudo mv kubectl /usr/local/bin/kubectl
+# Ensure ec2-user home exists and has correct permissions
+mkdir -p "$EC2_USER_HOME"
+chown -R ec2-user:ec2-user "$EC2_USER_HOME"
 
-curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-chmod 700 get_helm.sh
-./get_helm.sh
+echo "======== Downloading and installing kind, kubectl, helm, kubectx, k9s, kubecolor ========"
 
-sudo git clone https://github.com/ahmetb/kubectx /opt/kubectx
-sudo ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx
-sudo ln -s /opt/kubectx/kubens /usr/local/bin/kubens
+# Create temp directory for downloads
+TEMP_DIR=$(mktemp -d)
+cd "${TEMP_DIR}"
 
-curl -sS https://webinstall.dev/k9s | bash
+# Function to check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
 
-curl -LO https://github.com/kubecolor/kubecolor/releases/download/v0.5.1/kubecolor_0.5.1_linux_amd64.tar.gz
-tar -xvf kubecolor_0.5.1_linux_amd64.tar.gz
-sudo mv kubecolor /usr/local/bin/
+# Function to download with retry
+download_with_retry() {
+    local url="$1"
+    local output="$2"
+    local max_retries=3
+    local retry_count=0
+    
+    while [ $retry_count -lt $max_retries ]; do
+        if curl -L -f -s "$url" -o "$output"; then
+            return 0
+        fi
+        retry_count=$((retry_count + 1))
+        echo "Download failed, retrying ($retry_count/$max_retries)..."
+        sleep 2
+    done
+    echo "Failed to download $url after $max_retries attempts"
+    return 1
+}
 
-echo "============ tmux and bash configuration ====================="
-echo "set -g mouse on" >> ~/.tmux.conf
+# Install kind
+if ! command_exists kind; then
+    echo "Installing kind..."
+    KIND_VERSION="v0.30.0"
+    if [ "$(uname -m)" = "x86_64" ]; then
+        download_with_retry "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64" ./kind
+    elif [ "$(uname -m)" = "aarch64" ]; then
+        download_with_retry "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-arm64" ./kind
+    else
+        echo "Unsupported architecture: $(uname -m)"
+        exit 1
+    fi
+    chmod +x ./kind
+    sudo mv ./kind /usr/local/bin/kind
+    echo "kind installed successfully"
+else
+    echo "kind already installed: $(kind --version)"
+fi
 
-echo "alias k='kubectl'" >> ~/.bashrc
-echo "alias kubectl='kubecolor'" >> ~/.bashrc
+# Install kubectl
+if ! command_exists kubectl; then
+    echo "Installing kubectl..."
+    KUBE_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+    download_with_retry "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/amd64/kubectl" ./kubectl
+    chmod +x kubectl
+    sudo mv kubectl /usr/local/bin/kubectl
+    echo "kubectl installed successfully"
+else
+    echo "kubectl already installed: $(kubectl version --client --short 2>/dev/null | head -1)"
+fi
 
-source ~/.bashrc
+# Install Helm
+if ! command_exists helm; then
+    echo "Installing Helm..."
+    download_with_retry "https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3" get_helm.sh
+    chmod 700 get_helm.sh
+    ./get_helm.sh
+    echo "Helm installed successfully"
+else
+    echo "Helm already installed: $(helm version --short)"
+fi
 
-rm -rf kubecolor_0.5.1_linux_amd64.tar.gz LICENSE README.md get_helm.sh
+# Install kubectx and kubens
+if ! command_exists kubectx; then
+    echo "Installing kubectx and kubens..."
+    if [ -d "/opt/kubectx" ]; then
+        sudo rm -rf /opt/kubectx
+    fi
+    sudo git clone --depth 1 https://github.com/ahmetb/kubectx /opt/kubectx
+    sudo ln -sf /opt/kubectx/kubectx /usr/local/bin/kubectx
+    sudo ln -sf /opt/kubectx/kubens /usr/local/bin/kubens
+    echo "kubectx and kubens installed successfully"
+else
+    echo "kubectx already installed"
+fi
+
+# Install k9s
+if ! command_exists k9s; then
+    echo "Installing k9s..."
+    # Alternative method: direct download (more reliable)
+    K9S_VERSION="v0.32.4"
+    if [ "$(uname -m)" = "x86_64" ]; then
+        download_with_retry "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_amd64.tar.gz" k9s.tar.gz
+        tar -xzf k9s.tar.gz k9s
+        sudo mv k9s /usr/local/bin/
+    elif [ "$(uname -m)" = "aarch64" ]; then
+        download_with_retry "https://github.com/derailed/k9s/releases/download/${K9S_VERSION}/k9s_Linux_arm64.tar.gz" k9s.tar.gz
+        tar -xzf k9s.tar.gz k9s
+        sudo mv k9s /usr/local/bin/
+    fi
+    echo "k9s installed successfully"
+else
+    echo "k9s already installed"
+fi
+
+# Add kubectl aliases if not present
+if ! sudo -u ec2-user grep -q "alias k='kubectl'" "$BASHRC"; then
+    sudo -u ec2-user bash << 'EOF'
+    echo "" >> "$BASHRC"
+    echo "# Kubernetes aliases" >> "$BASHRC"
+    echo "alias k='kubectl'" >> "$BASHRC"
+    echo "alias kg='kubectl get'" >> "$BASHRC"
+    echo "alias kd='kubectl describe'" >> "$BASHRC"
+    echo "alias ka='kubectl apply -f'" >> "$BASHRC"
+    echo "alias kdel='kubectl delete'" >> "$BASHRC"
+    echo "alias kl='kubectl logs'" >> "$BASHRC"
+    echo "alias kex='kubectl exec -it'" >> "$BASHRC"
+EOF
+fi
+
+# Add kubecolor configuration if not present
+if ! sudo -u ec2-user grep -q "alias kubectl='kubecolor'" "$BASHRC"; then
+    sudo -u ec2-user bash << 'EOF'
+    echo "" >> "$BASHRC"
+    echo "# kubecolor configuration" >> "$BASHRC"
+    echo "if command -v kubecolor >/dev/null 2>&1; then" >> "$BASHRC"
+    echo "    alias kubectl='kubecolor'" >> "$BASHRC"
+    echo "    # Make sure completion still works" >> "$BASHRC"
+    echo "    complete -o default -F __start_kubectl kubectl" >> "$BASHRC"
+    echo "fi" >> "$BASHRC"
+EOF
+fi
+
+# Add shell completion if not present
+if ! sudo -u ec2-user grep -q "source /usr/share/bash-completion/bash_completion" "$BASHRC" 2>/dev/null; then
+    sudo -u ec2-user bash << 'EOF'
+    echo "" >> "$BASHRC"
+    echo "# Shell completion" >> "$BASHRC"
+    echo "if [ -f /usr/share/bash-completion/bash_completion ]; then" >> "$BASHRC"
+    echo "    source /usr/share/bash-completion/bash_completion" >> "$BASHRC"
+    echo "elif [ -f /etc/bash_completion ]; then" >> "$BASHRC"
+    echo "    source /etc/bash_completion" >> "$BASHRC"
+    echo "fi" >> "$BASHRC"
+EOF
+fi
+
+# Add kubectl completion if not present
+if ! sudo -u ec2-user grep -q "__start_kubectl" "$BASHRC" 2>/dev/null; then
+    sudo -u ec2-user bash << 'EOF'
+    echo "" >> "$BASHRC"
+    echo "# kubectl completion" >> "$BASHRC"
+    echo "if command -v kubectl >/dev/null 2>&1; then" >> "$BASHRC"
+    echo "    source <(kubectl completion bash)" >> "$BASHRC"
+    echo "    complete -o default -F __start_kubectl k" >> "$BASHRC"
+    echo "fi" >> "$BASHRC"
+EOF
+fi
+
+# Also configure for root user (optional but recommended)
+ROOT_BASHRC="/root/.bashrc"
+if [ ! -f "$ROOT_BASHRC" ] || ! grep -q "alias k='kubectl'" "$ROOT_BASHRC"; then
+    echo "" >> "$ROOT_BASHRC"
+    echo "# Kubernetes aliases" >> "$ROOT_BASHRC"
+    echo "alias k='kubectl'" >> "$ROOT_BASHRC"
+    echo "alias kg='kubectl get'" >> "$ROOT_BASHRC"
+    echo "alias kd='kubectl describe'" >> "$ROOT_BASHRC"
+    echo "alias ka='kubectl apply -f'" >> "$ROOT_BASHRC"
+    echo "alias kdel='kubectl delete'" >> "$ROOT_BASHRC"
+    echo "alias kl='kubectl logs'" >> "$ROOT_BASHRC"
+    echo "alias kex='kubectl exec -it'" >> "$ROOT_BASHRC"
+    
+    echo "" >> "$ROOT_BASHRC"
+    echo "# kubecolor configuration" >> "$ROOT_BASHRC"
+    echo "if command -v kubecolor >/dev/null 2>&1; then" >> "$ROOT_BASHRC"
+    echo "    alias kubectl='kubecolor'" >> "$ROOT_BASHRC"
+    echo "    complete -o default -F __start_kubectl kubectl" >> "$ROOT_BASHRC"
+    echo "fi" >> "$ROOT_BASHRC"
+    
+    echo "" >> "$ROOT_BASHRC"
+    echo "# kubectl completion" >> "$ROOT_BASHRC"
+    echo "if command -v kubectl >/dev/null 2>&1; then" >> "$ROOT_BASHRC"
+    echo "    source <(kubectl completion bash)" >> "$ROOT_BASHRC"
+    echo "    complete -o default -F __start_kubectl k" >> "$ROOT_BASHRC"
+    echo "fi" >> "$ROOT_BASHRC"
+fi
