@@ -150,83 +150,19 @@ else
     echo "k9s already installed"
 fi
 
-# Add kubectl aliases if not present
-if ! sudo -u ec2-user grep -q "alias k='kubectl'" "$BASHRC"; then
-    sudo -u ec2-user bash << 'EOF'
-    echo "" >> "$BASHRC"
-    echo "# Kubernetes aliases" >> "$BASHRC"
-    echo "alias k='kubectl'" >> "$BASHRC"
-    echo "alias kg='kubectl get'" >> "$BASHRC"
-    echo "alias kd='kubectl describe'" >> "$BASHRC"
-    echo "alias ka='kubectl apply -f'" >> "$BASHRC"
-    echo "alias kdel='kubectl delete'" >> "$BASHRC"
-    echo "alias kl='kubectl logs'" >> "$BASHRC"
-    echo "alias kex='kubectl exec -it'" >> "$BASHRC"
-EOF
+if [ ! -f /usr/local/bin/kubecolor ]; then
+    curl -LO https://github.com/kubecolor/kubecolor/releases/download/v0.5.1/kubecolor_0.5.1_linux_amd64.tar.gz
+    tar -xvf kubecolor_0.5.1_linux_amd64.tar.gz
+    sudo mv kubecolor /usr/local/bin/
+    rm kubecolor_0.5.1_linux_amd64.tar.gz
+else
+    echo "kubecolor already installed"
 fi
 
-# Add kubecolor configuration if not present
-if ! sudo -u ec2-user grep -q "alias kubectl='kubecolor'" "$BASHRC"; then
-    sudo -u ec2-user bash << 'EOF'
-    echo "" >> "$BASHRC"
-    echo "# kubecolor configuration" >> "$BASHRC"
-    echo "if command -v kubecolor >/dev/null 2>&1; then" >> "$BASHRC"
-    echo "    alias kubectl='kubecolor'" >> "$BASHRC"
-    echo "    # Make sure completion still works" >> "$BASHRC"
-    echo "    complete -o default -F __start_kubectl kubectl" >> "$BASHRC"
-    echo "fi" >> "$BASHRC"
+echo "============ tmux and bash configuration ====================="
+sudo -u ec2-user bash << 'EOF'
+echo "set -g mouse on" >> /home/ec2-user/.tmux.conf
+echo "alias k='kubectl'" >> /home/ec2-user/.bashrc
+echo "alias kubectl='kubecolor'" >> /home/ec2-user/.bashrc
+source /home/ec2-user/.bashrc
 EOF
-fi
-
-# Add shell completion if not present
-if ! sudo -u ec2-user grep -q "source /usr/share/bash-completion/bash_completion" "$BASHRC" 2>/dev/null; then
-    sudo -u ec2-user bash << 'EOF'
-    echo "" >> "$BASHRC"
-    echo "# Shell completion" >> "$BASHRC"
-    echo "if [ -f /usr/share/bash-completion/bash_completion ]; then" >> "$BASHRC"
-    echo "    source /usr/share/bash-completion/bash_completion" >> "$BASHRC"
-    echo "elif [ -f /etc/bash_completion ]; then" >> "$BASHRC"
-    echo "    source /etc/bash_completion" >> "$BASHRC"
-    echo "fi" >> "$BASHRC"
-EOF
-fi
-
-# Add kubectl completion if not present
-if ! sudo -u ec2-user grep -q "__start_kubectl" "$BASHRC" 2>/dev/null; then
-    sudo -u ec2-user bash << 'EOF'
-    echo "" >> "$BASHRC"
-    echo "# kubectl completion" >> "$BASHRC"
-    echo "if command -v kubectl >/dev/null 2>&1; then" >> "$BASHRC"
-    echo "    source <(kubectl completion bash)" >> "$BASHRC"
-    echo "    complete -o default -F __start_kubectl k" >> "$BASHRC"
-    echo "fi" >> "$BASHRC"
-EOF
-fi
-
-# Also configure for root user (optional but recommended)
-ROOT_BASHRC="/root/.bashrc"
-if [ ! -f "$ROOT_BASHRC" ] || ! grep -q "alias k='kubectl'" "$ROOT_BASHRC"; then
-    echo "" >> "$ROOT_BASHRC"
-    echo "# Kubernetes aliases" >> "$ROOT_BASHRC"
-    echo "alias k='kubectl'" >> "$ROOT_BASHRC"
-    echo "alias kg='kubectl get'" >> "$ROOT_BASHRC"
-    echo "alias kd='kubectl describe'" >> "$ROOT_BASHRC"
-    echo "alias ka='kubectl apply -f'" >> "$ROOT_BASHRC"
-    echo "alias kdel='kubectl delete'" >> "$ROOT_BASHRC"
-    echo "alias kl='kubectl logs'" >> "$ROOT_BASHRC"
-    echo "alias kex='kubectl exec -it'" >> "$ROOT_BASHRC"
-    
-    echo "" >> "$ROOT_BASHRC"
-    echo "# kubecolor configuration" >> "$ROOT_BASHRC"
-    echo "if command -v kubecolor >/dev/null 2>&1; then" >> "$ROOT_BASHRC"
-    echo "    alias kubectl='kubecolor'" >> "$ROOT_BASHRC"
-    echo "    complete -o default -F __start_kubectl kubectl" >> "$ROOT_BASHRC"
-    echo "fi" >> "$ROOT_BASHRC"
-    
-    echo "" >> "$ROOT_BASHRC"
-    echo "# kubectl completion" >> "$ROOT_BASHRC"
-    echo "if command -v kubectl >/dev/null 2>&1; then" >> "$ROOT_BASHRC"
-    echo "    source <(kubectl completion bash)" >> "$ROOT_BASHRC"
-    echo "    complete -o default -F __start_kubectl k" >> "$ROOT_BASHRC"
-    echo "fi" >> "$ROOT_BASHRC"
-fi
