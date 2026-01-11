@@ -29,7 +29,7 @@ docker pull "${KIND_IMAGE}"
 
 echo "Step 5: Creating kind cluster..."
 # Option 1: If your dev-cluster.yaml specifies the image
-kind create cluster --config "./${CLUSTER_CONFIG}"
+kind create cluster --config "${CLUSTER_CONFIG}"
 
 # Option 2: If you need to override the image in the config
 # kind create cluster --config "${CLUSTER_CONFIG}" --name "${CLUSTER_NAME}" --image "${KIND_IMAGE}"
