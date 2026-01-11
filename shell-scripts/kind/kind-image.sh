@@ -15,8 +15,8 @@ aws ecr get-login-password --region ap-south-1 \
     --username AWS \
     --password-stdin "${ECR_REGISTRY}"
 
-echo "Step 2: Installing kind..."
-source ./kind-installation.sh
+# echo "Step 2: Installing kind..."
+# source ./kind-installation.sh
 
 echo "Step 3: Checking if cluster '${CLUSTER_NAME}' already exists..."
 if kind get clusters | grep -q "${CLUSTER_NAME}"; then
