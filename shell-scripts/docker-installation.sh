@@ -112,6 +112,8 @@ sleep 30
 #     sudo -u ec2-user bash -c "source ./kind-image.sh" || echo "Warning: kind-image.sh execution had issues"
 # fi
 
+echo "Running kind-image.sh as ec2-user..."
+
 chmod +x /home/ec2-user/automation-platform/shell-scripts/kind/kind-image.sh
 
 sudo -iu ec2-user bash <<'EOF'
