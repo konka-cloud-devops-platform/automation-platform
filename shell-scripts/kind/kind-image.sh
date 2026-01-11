@@ -7,7 +7,7 @@ set -e
 ECR_REGISTRY="384570460482.dkr.ecr.ap-south-1.amazonaws.com"
 KIND_IMAGE="${ECR_REGISTRY}/kindest-node:v1.34.3"
 CLUSTER_NAME="dev"  # Adjust based on your yaml config
-CLUSTER_CONFIG="dev-cluster.yaml"
+CLUSTER_CONFIG="/home/ec2-user/automation-platform/shell-scripts/kind/dev-cluster.yaml"
 
 echo "Step 1: Logging into AWS ECR..."
 aws ecr get-login-password --region ap-south-1 \
