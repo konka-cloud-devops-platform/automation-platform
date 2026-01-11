@@ -82,11 +82,11 @@ curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/inst
 ##############################################
 
 rm -rf /home/ec2-user/scripts
-git clone https://github.com/konka-devops-lab/scripts.git /home/ec2-user/scripts
-chown -R ec2-user:ec2-user /home/ec2-user/scripts
+git clone https://github.com/konka-cloud-devops-platform/automation-platform.git /home/ec2-user/automation-platform
+chown -R ec2-user:ec2-user /home/ec2-user/automation-platform
 
-git clone https://github.com/konka-devops-lab/crud-app.git /home/ec2-user/crud-app
-chown -R ec2-user:ec2-user /home/ec2-user/crud-app
+git clone https://github.com/konka-cloud-devops-platform/kubernetes-platform.git /home/ec2-user/kubernetes-platform
+chown -R ec2-user:ec2-user /home/ec2-user/kubernetes-platform
 
 ##############################################
 # Version Checks (for debugging and validation)
