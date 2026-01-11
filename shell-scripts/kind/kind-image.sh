@@ -3,17 +3,6 @@
 # Exit on error
 set -e
 
-# Define home directory based on user
-if [ "$(whoami)" = "ec2-user" ]; then
-    USER_HOME="/home/ec2-user"
-elif [ "$(whoami)" = "root" ]; then
-    USER_HOME="/home/ec2-user"
-    # Optional: switch to ec2-user for execution
-    # exec sudo -u ec2-user "$0" "$@"
-else
-    USER_HOME="/home/ec2-user"
-fi
-
 # Define variables
 ECR_REGISTRY="384570460482.dkr.ecr.ap-south-1.amazonaws.com"
 KIND_IMAGE="${ECR_REGISTRY}/kindest-node:v1.34.3"
@@ -71,8 +60,8 @@ fi
 if [ -f /home/ec2-user/.docker/config.json ]; then
     for node in $NODES; do
         echo "Copying to $node..."
-        docker exec $node mkdir -p /root/.docker
-        docker cp /home/root/.docker/config.json $node:/root/.docker/config.json
+        docker exec $node mkdir -p /ec2-user/.docker
+        docker cp /home/ec2-user/.docker/config.json $node:/ec2-user/.docker/config.json
     done
 else
     echo "/home/ec2-user/.docker/config.json does not exist"
@@ -80,7 +69,7 @@ fi
 
 for node in $NODES; do
     echo "Checking $node..."
-    docker exec $node ls -la /root/.docker/config.json
+    docker exec $node ls -la /ec2-user/.docker/config.json
 done
 EOF
 
