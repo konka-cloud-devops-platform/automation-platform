@@ -191,12 +191,15 @@
 # ############################################
 # echo "🎉 KIND cluster '${CLUSTER_NAME}' setup completed successfully!"
 
+
 #!/bin/bash
 set -euo pipefail
 
+echo "Running as user: $(whoami)"
+
 if [ "$(whoami)" != "ec2-user" ]; then
-  echo "❌ Run as ec2-user only"
-  exit 1
+  echo "Not ec2-user. Re-executing as ec2-user..."
+  exec sudo -iu ec2-user "$0"
 fi
 
 AWS_REGION="ap-south-1"
