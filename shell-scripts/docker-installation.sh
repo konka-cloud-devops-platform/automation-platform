@@ -139,7 +139,7 @@ cat <<EOF > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
             "file_path": "/var/log/user-data.log",
             "log_group_name": "/ec2/userdata",
             "log_stream_name": "${INSTANCE_ID}",
-            "retention_in_days": 7
+            "retention_in_days": 1
           }
         ]
       }
