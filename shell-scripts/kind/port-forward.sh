@@ -4,7 +4,7 @@ commands=(
   "kubectl port-forward svc/argocd-server -n argocd --address 0.0.0.0 8080:80"
   "kubectl port-forward svc/prometheus-grafana -n monitoring --address 0.0.0.0 8081:80"
   "kubectl port-forward svc/nginx-kibana -n logging --address 0.0.0.0 8082:80"
-  "kubectl port-forward svc/dev-frontend -n instana --address 0.0.0.0 8083:80"
+  "kubectl port-forward svc/dev-frontend -n instana --address 0.0.0.0 8083:8080"
   "kubectl port-forward svc/kiali -n istio-system --address 0.0.0.0 8084:20001"
   "kubectl port-forward -n istio-system svc/jaeger-query --address 0.0.0.0 8085:80"
   "kubectl port-forward -n crud svc/crud-frontend  --address 0.0.0.0 8086:80"
