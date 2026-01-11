@@ -72,7 +72,7 @@ if [ -f /home/ec2-user/.docker/config.json ]; then
     for node in $NODES; do
         echo "Copying to $node..."
         docker exec $node mkdir -p /root/.docker
-        docker cp /home/ec2-user/.docker/config.json $node:/root/.docker/config.json
+        docker cp /home/root/.docker/config.json $node:/root/.docker/config.json
     done
 else
     echo "/home/ec2-user/.docker/config.json does not exist"

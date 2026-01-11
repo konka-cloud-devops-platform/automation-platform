@@ -166,3 +166,9 @@ echo "alias k='kubectl'" >> /home/ec2-user/.bashrc
 echo "alias kubectl='kubecolor'" >> /home/ec2-user/.bashrc
 source /home/ec2-user/.bashrc
 EOF
+
+# Configure for root user
+echo "set -g mouse on" >> /root/.tmux.conf
+echo "alias k='kubectl'" >> /root/.bashrc
+echo "alias kubectl='kubecolor'" >> /root/.bashrc
+source /root/.bashrc
