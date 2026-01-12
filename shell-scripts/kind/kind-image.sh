@@ -50,7 +50,7 @@ kubectl get nodes
 
 echo "Step 7: Copying Docker config to kind nodes..."
 
-sudo -u ec2-user bash <<'EOF'
+
 NODES=$(kind get nodes --name dev 2>/dev/null || echo '')
 if [ "$NODES" = "" ]; then
     echo "No 'dev' cluster found or kind not available"
@@ -71,6 +71,5 @@ for node in $NODES; do
     echo "Checking $node..."
     docker exec $node ls -la /ec2-user/.docker/config.json
 done
-EOF
 
 echo "Kind cluster setup completed successfully!"

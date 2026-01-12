@@ -85,8 +85,8 @@ rm -rf /home/ec2-user/scripts
 git clone https://github.com/konka-cloud-devops-platform/automation-platform.git /home/ec2-user/automation-platform
 chown -R ec2-user:ec2-user /home/ec2-user/automation-platform
 
-cd /home/ec2-user/automation-platform/shell-scripts/kind
-source ./kind-image.sh
+# cd /home/ec2-user/automation-platform/shell-scripts/kind
+# source ./kind-image.sh
 
 git clone https://github.com/konka-cloud-devops-platform/kubernetes-platform.git /home/ec2-user/kubernetes-platform
 chown -R ec2-user:ec2-user /home/ec2-user/kubernetes-platform
@@ -104,12 +104,12 @@ echo "=========================="
 
 sleep 30
 
-# Execute kind-image.sh if it exists
-if [ -f "/home/ec2-user/automation-platform/shell-scripts/kind/kind-image.sh" ]; then
-    echo "Running kind-image.sh..."
-    cd /home/ec2-user/automation-platform/shell-scripts/kind
-    # Source as ec2-user to preserve environment
-    sudo -u ec2-user bash -c "source ./kind-image.sh" || echo "Warning: kind-image.sh execution had issues"
-fi
+# # Execute kind-image.sh if it exists
+# if [ -f "/home/ec2-user/automation-platform/shell-scripts/kind/kind-image.sh" ]; then
+#     echo "Running kind-image.sh..."
+#     cd /home/ec2-user/automation-platform/shell-scripts/kind
+#     # Source as ec2-user to preserve environment
+#     sudo -u ec2-user bash -c "source ./kind-image.sh" || echo "Warning: kind-image.sh execution had issues"
+# fi
 
 echo "USERDATA COMPLETED SUCCESSFULLY"
