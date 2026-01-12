@@ -15,16 +15,7 @@ aws ecr get-login-password --region ap-south-1 \
     --username AWS \
     --password-stdin "${ECR_REGISTRY}"
 
-# echo "Step 2: Installing kind..."
-# source ./kind-installation.sh
-
-echo "Step 3: Checking if cluster '${CLUSTER_NAME}' already exists..."
-if kind get clusters | grep -q "${CLUSTER_NAME}"; then
-    echo "Cluster '${CLUSTER_NAME}' already exists. Deleting it..."
-    kind delete cluster --name "${CLUSTER_NAME}"
-fi
-
-echo "Step 4: Pulling kind node image..."
+echo "Step 2: Pulling kind node image..."
 docker pull "${KIND_IMAGE}"
 # docker pull "${ECR_REGISTRY}/instana/mongo:v1"
 # docker pull "${ECR_REGISTRY}/instana/mysql:v1"
@@ -37,39 +28,30 @@ docker pull "${KIND_IMAGE}"
 # docker pull "${ECR_REGISTRY}/roboshop/payment:v1"
 # docker pull "${ECR_REGISTRY}/roboshop/web:v1"
 
-echo "Step 5: Creating kind cluster..."
+echo "Step 3: Creating kind cluster..."
 # Option 1: If your dev-cluster.yaml specifies the image
 kind create cluster --config "${CLUSTER_CONFIG}"
 
 # Option 2: If you need to override the image in the config
 # kind create cluster --config "${CLUSTER_CONFIG}" --name "${CLUSTER_NAME}" --image "${KIND_IMAGE}"
 
-echo "Step 6: Verifying cluster creation..."
+echo "Step 4: Verifying cluster creation..."
 kubectl cluster-info --context "kind-${CLUSTER_NAME}"
 kubectl get nodes
 
-echo "Step 7: Copying Docker config to kind nodes..."
+echo "Step 5: Copying Docker config to kind nodes..."
 
+cat ~/.docker/config.json
 
-NODES=$(kind get nodes --name dev 2>/dev/null || echo '')
-if [ "$NODES" = "" ]; then
-    echo "No 'dev' cluster found or kind not available"
-    exit 1
-fi
+for node in $(kind get nodes --name dev); do
+  echo "Copying to $node..."
+  docker exec $node mkdir -p /root/.docker
+  docker cp ~/.docker/config.json $node:/root/.docker/config.json
+done
 
-if [ -f /home/ec2-user/.docker/config.json ]; then
-    for node in $NODES; do
-        echo "Copying to $node..."
-        docker exec $node mkdir -p /ec2-user/.docker
-        docker cp /home/ec2-user/.docker/config.json $node:/ec2-user/.docker/config.json
-    done
-else
-    echo "/home/ec2-user/.docker/config.json does not exist"
-fi
-
-for node in $NODES; do
-    echo "Checking $node..."
-    docker exec $node ls -la /ec2-user/.docker/config.json
+for node in $(kind get nodes --name dev); do
+  echo "Checking $node..."
+  docker exec $node ls -la /root/.docker/config.json
 done
 
 echo "Kind cluster setup completed successfully!"
